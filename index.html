@@ -107,7 +107,7 @@
   <!-- Résultat complet -->
   <div id="resultat" class="resultat-date"></div>
 
-  <!-- Les 3 div séparés avec valeurs par défaut -->
+  <!-- Les 3 div séparés -->
   <div class="jour resultat-date">Date : </div>
   <div class="heure resultat-date">Heure : </div>
   <div class="durer resultat-date">Durée : </div>
@@ -119,10 +119,20 @@
     const resultat   = document.getElementById('resultat');
     const validerBtn = document.getElementById('validerBtn');
 
-    // Divs Techniman
     const divDate  = document.querySelector('.jour');
     const divHeure = document.querySelector('.heure');
     const divDuree = document.querySelector('.durer');
+
+    // 🔵 Charger les données depuis le serveur
+    fetch("load.php")
+      .then(res => res.json())
+      .then(data => {
+        if (data.date) {
+          divDate.innerHTML  = "Date : " + data.date;
+          divHeure.innerHTML = "Heure : " + data.heure;
+          divDuree.innerHTML = "Durée : " + data.duree + " min";
+        }
+      });
 
     validerBtn.addEventListener('click', () => {
       const dateValue = dateInput.value;
@@ -136,7 +146,6 @@
 
       const dateObj = new Date(dateValue + 'T' + timeValue);
 
-      // Format long pour le texte principal
       const options = {
         weekday: 'long',
         year: 'numeric',
@@ -146,20 +155,24 @@
         minute: '2-digit'
       };
 
-      // Format court Techniman
       const dateTechniman = dateValue.split("-").reverse().join("/");
       const heureTechniman = timeValue;
       const dureeTechniman = dureeValue;
 
-      // Injection dans les 3 div (format court)
-      divDate.innerHTML  =  dateTechniman;
-      divHeure.innerHTML =  heureTechniman;
-      divDuree.innerHTML =  dureeTechniman + " min";
+      divDate.innerHTML  = "Date : " + dateTechniman;
+      divHeure.innerHTML = "Heure : " + heureTechniman;
+      divDuree.innerHTML = "Durée : " + dureeTechniman + " min";
 
-      // Résultat complet (format long)
       resultat.textContent =
         "Date choisie : " + dateObj.toLocaleString('fr-FR', options) +
         " | Durée : " + dureeValue + " min";
+
+      // 🔵 Sauvegarder sur le serveur
+      fetch("save.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: "date=" + dateTechniman + "&heure=" + heureTechniman + "&duree=" + dureeTechniman
+      });
     });
   </script>
 
